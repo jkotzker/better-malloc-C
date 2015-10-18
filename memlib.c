@@ -37,7 +37,7 @@ typedef union header                     /* block header */
 } Header;
 
 
-static Header base = {0};                /* empty list to get started */
+static Header base;                /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
 static Header *morecore(unsigned nu);    /* declare morecore now */
@@ -109,13 +109,14 @@ static Header *morecore(unsigned nu)
 
   void *cp;
   Header *up;
+  int *sbrk(size_t);
 
   if (nu < NALLOC)
   {
     nu = NALLOC;
   }
 
-  cp = sbrk(nu * sizeof(Header));
+  cp = (void *) sbrk(nu * sizeof(Header));
 
   if (cp == (char *) -1){ /* no space at all */
     return NULL;
