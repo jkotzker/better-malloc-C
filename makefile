@@ -1,7 +1,7 @@
 CC = gcc
 ## DEPS =
 
-default: memlib.c
+default: memlib.a
 	$(CC) -o memlib.a memlib.h -std=c99 -Wall -g
 
 clean:
