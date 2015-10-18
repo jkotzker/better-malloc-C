@@ -18,10 +18,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 
-//Static array for use as dynamic memory; our "heap"
-//static char myblock[5000];
 
 typedef long Align;                      /* for alignment to long boundary */
+
+/* Header is the type for a block of memory */
 
 typedef union header                     /* block header */
 {
@@ -37,12 +37,12 @@ typedef union header                     /* block header */
 } Header;
 
 
-static Header base;                /* empty list to get started */
+static Header base;                      /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
-static Header *morecore(unsigned nu);    /* declare morecore now */
+static Header *morecore(unsigned nu);    /* declare morecore now, morecore gets more dynamic memory from the system */
 
-/* malloc: general-purpose storage allocator */
+/* my_malloc: general-purpose storage allocator, with built-in error handling */
 void* my_malloc (size_t nbytes)
 {
   Header*  p;
@@ -101,8 +101,9 @@ void* my_malloc (size_t nbytes)
   return result;
 }
 
-
+/* This definition of NALLOC was recommended from K&R C book */
 #define NALLOC 1024 /* minimum #units to request */
+
 /* morecore: ask system for more memory */
 static Header *morecore(unsigned nu)
 {
