@@ -128,3 +128,7 @@ static Header *morecore(unsigned nu)
 
   return up;
 }
+
+int main(int argc, char **argv) {
+    return 1;
+}
