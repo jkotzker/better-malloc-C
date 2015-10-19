@@ -29,8 +29,8 @@ int main(int argc, char **argv) {
     {
         char * a = argv[1];
         char * b = argv[2];
-        int curr1 = *a - '0';
-        int curr2 = *b - '0';
+        int curr1 = atoi(a);
+        int curr2 = atoi(b);
         printf("Allocating memory for a new struct...\n");
         s * mynew = (s *) malloc(sizeof(s));
         if( mynew != NULL )

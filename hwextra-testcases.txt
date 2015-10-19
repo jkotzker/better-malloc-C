@@ -13,13 +13,13 @@ Second datum: <input2>
 Freeing struct...
 Now, let's test some errors...
 First error test...
-Error at file:m, line:48
+Error at file:mallocme.c, line:48
 ERROR: You have already freed this block, and it has not been reallocated since.
 Second error test...
-Error at file:m, line:52
+Error at file:mallocme.c, line:52
 ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.
 You can only use the included my_free() function to free memory allocated with the included my_malloc().
-Error at file:m, line:56
+Error at file:mallocme.c, line:56
 ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.
 You can only use the included my_free() function to free memory allocated with the included my_malloc().
 ---------------------------------------------------------------------------------------
