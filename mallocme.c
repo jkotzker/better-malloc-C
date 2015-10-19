@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
         printf("First error test...\n");
         free(mynew);
 
-        printf("Seconf error test...\n");
+        printf("Second error test...\n");
         s * mynon;
         free(mynon);
 

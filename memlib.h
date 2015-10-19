@@ -180,7 +180,7 @@ void my_free(void *ap, int called, const char * file, int line) {
             return;
         }
         else {
-            recog = 0xBBBBBBBB;
+            bp->s.recognize = 0xBBBBBBBB;
         }
     }
 
