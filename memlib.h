@@ -25,14 +25,14 @@ typedef long Align;                      /* for alignment to long boundary */
 
 typedef union header                     /* block header */
 {
-  struct
-  {
-    union header *ptr;                   /* next block if on free list */
-    size_t size;                         /* size of this block */
-    unsigned int recognize;              /* recognition pattern to prevent freeing unallocated memory */
-  } s;
+    struct
+    {
+        union header *ptr;                   /* next block if on free list */
+        size_t size;                         /* size of this block */
+        unsigned int recognize;              /* recognition pattern to prevent freeing unallocated memory */
+    } s;
 
-  Align x;                               /* force alignment of blocks */
+    Align x;                               /* force alignment of blocks */
 
 } Header;
 
@@ -41,91 +41,126 @@ static Header base;                      /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
 static Header *morecore(unsigned nu);    /* declare morecore now, morecore gets more dynamic memory from the system */
+void my_free(void *ap);                  /* declare my_free now */
 
 /* my_malloc: general-purpose storage allocator, with built-in error handling */
 void* my_malloc (size_t nbytes)
 {
-  Header*  p;
-  Header*  prevptr;
-  size_t   nunits;
-  void*    result;
-  bool     is_allocating;
+    Header*  p;
+    Header*  prevptr;
+    size_t   nunits;
+    void*    result;
+    bool     is_allocating;
 
-  nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
+    nunits = (nbytes + sizeof(Header) - 1) / sizeof(Header) + 1;
 
-  prevptr = freeptr;
-  if (prevptr == NULL)                   /* no free list yet */
-  {
-    base.s.ptr  = &base;
-    freeptr     = &base;
-    prevptr     = &base;
-    base.s.size = 0;
-    base.s.recognize = 0xAAAAAAAA;       /* set recognize to 0xAAAAAAAA every time allocated */
-  }
-
-  is_allocating = true;
-  for (p = prevptr->s.ptr; is_allocating; p = p->s.ptr)
-  {
-    if (p->s.size >= nunits)             /* big enough */
+    prevptr = freeptr;
+    if (prevptr == NULL)                   /* no free list yet */
     {
-      if (p->s.size == nunits)           /* exactly */
-      {
-        prevptr->s.ptr = p->s.ptr;
-      }
-      else                               /* allocate tail end */
-      {
-        p->s.size -= nunits;
-        p += p->s.size;
-        p->s.size = nunits;
-        p->s.recognize = 0xAAAAAAAA;     /* set recognize to 0xAAAAAAAA every time allocated */
-      }
-
-      freeptr = prevptr;
-      result = p+1;
-      is_allocating = false;             /* we are done */
+        base.s.ptr  = &base;
+        freeptr     = &base;
+        prevptr     = &base;
+        base.s.size = 0;
+        base.s.recognize = 0xAAAAAAAA;       /* set recognize to 0xAAAAAAAA every time allocated */
     }
 
-    if (p == freeptr)                    /* wrapped around free list */
+    is_allocating = true;
+    for (p = prevptr->s.ptr; is_allocating; p = p->s.ptr)
     {
-      //TODO: add a function here that adds more memory to the heap
-      p = morecore(nunits);
-      if (p == NULL)
-      {
-        result = NULL;                   /* none left */
-        is_allocating = false;
-      }
-    }
-    prevptr = p;
-  } /* for */
+        if (p->s.size >= nunits)             /* big enough */
+        {
+            if (p->s.size == nunits)           /* exactly */
+            {
+                prevptr->s.ptr = p->s.ptr;
+            }
+            else                               /* allocate tail end */
+            {
+                p->s.size -= nunits;
+                p += p->s.size;
+                p->s.size = nunits;
+                p->s.recognize = 0xAAAAAAAA;     /* set recognize to 0xAAAAAAAA every time allocated */
+            }
 
-  return result;
+            freeptr = prevptr;
+            result = p+1;
+            is_allocating = false;             /* we are done */
+        }
+
+        if (p == freeptr)                    /* wrapped around free list */
+        {
+            //TODO: add a function here that adds more memory to the heap
+            p = morecore(nunits);
+            if (p == NULL)
+            {
+                result = NULL;                   /* none left */
+                is_allocating = false;
+            }
+        }
+        prevptr = p;
+    } /* for */
+
+    return result;
 }
 
 /* This definition of NALLOC was recommended from K&R C book */
 #define NALLOC 1024 /* minimum #units to request */
 
 /* morecore: ask system for more memory */
-static Header *morecore(unsigned nu)
+static Header *morecore(unsigned nunits)
 {
 
-  void *cp;
-  Header *up;
-  int *sbrk(size_t);
+    void *cp;                             /* pointer for new free memory added to the heap */
+    Header *up;                           /* pointer to a Header that will be returned as the new space */
+    int *sbrk(size_t);                    /* Declare function sbrk included from unistd.h */
 
-  if (nu < NALLOC)
-  {
-    nu = NALLOC;
-  }
+    if (nunits < NALLOC)                  /* On the recommendation of K&R C, allocated at minimum 1024 units to the heap */
+    {
+        nunits = NALLOC;
+    }
 
-  cp = (void *) sbrk(nu * sizeof(Header));
+    cp = (void *) sbrk(nunits * sizeof(Header));      /* gets more memory from the system */
 
-  if (cp == (char *) -1){ /* no space at all */
-    return NULL;
-  }
+    if (cp == (char *) -1) {                           /* checks if there was no additional memory in the system */
+        //TODO: throw an error here
+        return NULL;
+    }
 
-  up = (Header *) cp;
-  up->s.size = nu;
-  free((void *)(up+1));
+    up = (Header *) cp;                   /* makes a Header of the requested size in the new memory and returns it */
+    up->s.size = nunits;
+    my_free((void *)(up+1));
 
-  return up;
+    return up;
+}
+
+/* my_free, based off of K&R C */
+/* my_free: put block ap in free list */
+void my_free(void *ap) {
+    Header *bp;                                                          /* bp will point to Header of block being freed */
+    Header *p;
+    bp = (Header *)ap - 1;                                               /* make bp point to block header */
+    p = freeptr;
+
+    while(!(bp > p && bp < p->s.ptr)) {
+        if (p >= p->s.ptr && (bp > p || bp < p->s.ptr)) {
+            break;                                                       /* freed block at start or end of arena */
+        }
+        p = p->s.ptr;
+    }
+
+    if (bp + bp->s.size == p->s.ptr) {
+        bp->s.size += p->s.ptr->s.size;
+        bp->s.ptr = p->s.ptr->s.ptr;
+    }
+    else {
+        bp->s.ptr = p->s.ptr;
+    }
+
+    if (p + p->s.size == bp) {
+        p->s.size += bp->s.size;
+        p->s.ptr = bp->s.ptr;
+    }
+    else {
+        p->s.ptr = bp;
+    }
+    freeptr = p;
 }
