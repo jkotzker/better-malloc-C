@@ -110,6 +110,7 @@ void* my_malloc (size_t nbytes, const char * file, int line)
             freeptr = prevptr;
             result = p+1;
             is_allocating = false;             /* we are done */
+            break;
         }
 
         if (p == freeptr)                    /* wrapped around free list */
