@@ -41,29 +41,29 @@ typedef union header                     /* block header */
 static Header base;                      /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
-static Header *morecore(unsigned nu, char * file, char * line);    /* declare morecore now, morecore gets more dynamic memory from the system */
-void my_free(void *ap, char * file, char * line);                  /* declare my_free now */
+static Header *morecore(unsigned nu, const char file, const int line);    /* declare morecore now, morecore gets more dynamic memory from the system */
+void my_free(void *ap, const char file, const int line);                  /* declare my_free now */
 
 
 /* ErrorHandler function allows all included functions to throw errors to the handler, which provides useful feedback to the programmer */
-void ErrorHandler (ErrorCode e, char * file, char * line)
+void ErrorHandler (ErrorCode e, const char file, const char line)
 {
     if(e == 1)
     {
-        printf("Error at file:%s, line:%s\n", file, line);
-        printf("ERROR: System is out of dynamic memory! This is a problem, you cannot be allocated any more space.\n");
+        printf("Error at file:%c, line:%c\n", file, line);
+        printf("ERROR: System has fewer than 1024 units of dynamic memory remaining! This is a problem; for your safety, you cannot be allocated any more space.\n");
         printf("Try checking your program for memory leaks.\n");
     }
 
     if(e == 2)
     {
-        printf("Error at file:%s, line:%s\n", file, line);
+        printf("Error at file:%c, line:%c\n", file, line);
         printf("ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.\n");
         printf("You can only use the included my_free() function to free memory allocated with the included my_malloc().\n");
     }
     if(e == 3)
     {
-        printf("Error at file:%s, line:%s\n", file, line);
+        printf("Error at file:%c, line:%c\n", file, line);
         printf("ERROR: You have already freed this block, and it has not been reallocated since.\n");
     }
 
@@ -71,7 +71,7 @@ void ErrorHandler (ErrorCode e, char * file, char * line)
 }
 
 /* my_malloc: general-purpose storage allocator, with built-in error handling */
-void* my_malloc (size_t nbytes, char * file, char * line)
+void* my_malloc (size_t nbytes, const char file, const int line)
 {
     Header*  p;
     Header*  prevptr;
@@ -129,11 +129,11 @@ void* my_malloc (size_t nbytes, char * file, char * line)
     return result;
 }
 
-/* This definition of NALLOC was recommended from K&R C book */
-#define NALLOC 1024 /* minimum #units to request */
+
+#define NALLOC sizeof(Header) /* minimum #units to request is size of a single block */
 
 /* morecore: ask system for more memory */
-static Header *morecore(unsigned nunits, char * file, char * line)
+static Header *morecore(unsigned nunits, const char file, const int line)
 {
 
     void *cp;                             /* pointer for new free memory added to the heap */
@@ -160,7 +160,7 @@ static Header *morecore(unsigned nunits, char * file, char * line)
 
 /* my_free, based off of K&R C */
 /* my_free: put block ap in free list */
-void my_free(void *ap, char * file, char * line) {
+void my_free(void *ap, const char file, const int line) {
     Header *bp;                                                          /* bp will point to Header of block being freed */
     Header *p;
     bp = (Header *)ap - 1;                                               /* make bp point to block header */
