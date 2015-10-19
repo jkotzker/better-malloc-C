@@ -1,6 +1,6 @@
 hwextra-testcases.txt
 
-The test program will take any two integers, and print out the following:
+The test program will take any two ints, and print out the following:
 
 
 ---------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ ERROR: You have tried to free memory that was either never allocated, or allocat
 You can only use the included my_free() function to free memory allocated with the included my_malloc().
 ---------------------------------------------------------------------------------------
 
-The program takes the two integers and makes a struct to hold them, allocating memory for it and checking that it suceeded.
+The program takes the two ints and makes a struct to hold them, allocating memory for it and checking that it suceeded.
 The program then checks that the integers were properly written into the struct. It then frees the memory allocated for the struct.
 It then tests that the error catching is working. It tries to free the same memory again, it tries to free unallocated memory, and it tries to free memory not allocated with my_malloc.
 It then exits.
