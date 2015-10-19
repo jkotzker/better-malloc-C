@@ -11,9 +11,6 @@
 #define malloc( x )     my_malloc( x, __FILE__, __LINE__ )
 #define free( x )       my_free( x, __FILE__, __LINE__ )
 
-void my_free(void *ap, const char file, const int line);
-void* my_malloc (size_t nbytes, const char file, const int line);
-
 typedef struct mystruct {
     int i;
     char c;
@@ -31,17 +28,16 @@ int main(int argc, char **argv) {
         char * b = argv[2];
         int curr = *a - '0';
         printf("Allocating memory for a new struct...\n");
-        s mynew = (s *) malloc(sizeof(s));
-        s * sptr = &mynew;
+        s * mynew = (s *) malloc(sizeof(s));
         if(mynew)
         {
             printf("Malloc succeeded, added data...\n");
-            sptr->i = curr;
-            sptr->c = *b;
+            mynew->i = curr;
+            mynew->c = *b;
             printf("Data added.\n");
         }
         printf("Freeing struct...\n");
-        my_free(sptr);
+        free(mynew);
         printf("Exiting...\n");
     }
 }
