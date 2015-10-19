@@ -9,7 +9,7 @@
 #include "memlib.h"
 
 #define malloc( x )     my_malloc( x, __FILE__, __LINE__ )
-#define free( x )       my_free( x, __FILE__, __LINE__ )
+#define free( x )       my_free( x, 0, __FILE__, __LINE__ )
 
 typedef struct mystruct {
     int i;

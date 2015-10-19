@@ -42,7 +42,7 @@ static Header base;                      /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
 static Header *morecore(unsigned nu, const char * file, int line);    /* declare morecore now, morecore gets more dynamic memory from the system */
-void my_free(void *ap, const char * file, int line);                  /* declare my_free now */
+void my_free(void *ap, int called, const char * file, int line);                  /* declare my_free now */
 
 
 /* ErrorHandler function allows all included functions to throw errors to the handler, which provides useful feedback to the programmer */
@@ -153,32 +153,35 @@ static Header *morecore(unsigned nunits, const char * file, int line)
 
     up = (Header *) cp;                   /* makes a Header of the requested size in the new memory and returns it */
     up->s.size = nunits;
-    my_free((void *)(up+1), file, line);
+    my_free((void *)(up+1), 1, file, line);
 
     return up;
 }
 
 /* my_free, based off of K&R C */
 /* my_free: put block ap in free list */
-void my_free(void *ap, const char * file, int line) {
+void my_free(void *ap, int called, const char * file, int line) {
     Header *bp;                                                          /* bp will point to Header of block being freed */
     Header *p;
     bp = (Header *)ap - 1;                                               /* make bp point to block header */
     p = freeptr;
 
-    unsigned int recog = bp->s.recognize;
-    if(!(recog == 0xAAAAAAAA || recog == 0xBBBBBBBB))
+    if(called != 1)
     {
-        ErrorHandler(2, file, line);
-        return;
-    }
-    if(recog == 0xBBBBBBBB)
-    {
-        ErrorHandler(3, file, line);
-        return;
-    }
-    else {
-        recog = 0xBBBBBBBB;
+        unsigned int recog = bp->s.recognize;
+        if(!(recog == 0xAAAAAAAA || recog == 0xBBBBBBBB))
+        {
+            ErrorHandler(2, file, line);
+            return;
+        }
+        if(recog == 0xBBBBBBBB)
+        {
+            ErrorHandler(3, file, line);
+            return;
+        }
+        else {
+            recog = 0xBBBBBBBB;
+        }
     }
 
     while(!(bp > p && bp < p->s.ptr)) {
