@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
         int curr = *a - '0';
         printf("Allocating memory for a new struct...\n");
         s * mynew = (s *) malloc(sizeof(s));
-        if(mynew)
+        if( mynew != NULL )
         {
             printf("Malloc succeeded, added data...\n");
             mynew->i = curr;

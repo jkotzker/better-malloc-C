@@ -50,20 +50,20 @@ void ErrorHandler (ErrorCode e, const char * file, int line)
 {
     if(e == 1)
     {
-        printf("Error at file:%d, line:%i\n", *file, line);
+        printf("Error at file:%c, line:%i\n", *file, line);
         printf("ERROR: System has fewer than 1024 units of dynamic memory remaining! This is a problem; for your safety, you cannot be allocated any more space.\n");
         printf("Try checking your program for memory leaks.\n");
     }
 
     if(e == 2)
     {
-        printf("Error at file:%d, line:%i\n", *file, line);
+        printf("Error at file:%c, line:%i\n", *file, line);
         printf("ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.\n");
         printf("You can only use the included my_free() function to free memory allocated with the included my_malloc().\n");
     }
     if(e == 3)
     {
-        printf("Error at file:%d, line:%i\n", *file, line);
+        printf("Error at file:%c, line:%i\n", *file, line);
         printf("ERROR: You have already freed this block, and it has not been reallocated since.\n");
     }
 
@@ -88,7 +88,6 @@ void* my_malloc (size_t nbytes, const char * file, int line)
         freeptr     = &base;
         prevptr     = &base;
         base.s.size = 0;
-        base.s.recognize = 0xAAAAAAAA;       /* set recognize to 0xAAAAAAAA every time allocated */
     }
 
     is_allocating = true;
