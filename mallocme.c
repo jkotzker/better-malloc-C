@@ -12,22 +12,22 @@
 #define free( x )       my_free( x, 0, __FILE__, __LINE__ )
 
 typedef struct mystruct {
-    float i1;
-    float i2;
+    int i1;
+    int i2;
 } s;
 
 int main(int argc, char **argv) {
     if(argc != 3)
     {
-        printf("ERROR: Expected input in form of 2 floating point numbers.\n");
+        printf("ERROR: Expected input in form of 2 integers.\n");
         return 1;
     }
     else
     {
         char * a = argv[1];
         char * b = argv[2];
-        float curr1 = *a - '0';
-        float curr2 = *b - '0';
+        int curr1 = *a - '0';
+        int curr2 = *b - '0';
         printf("Allocating memory for a new struct...\n");
         s * mynew = (s *) malloc(sizeof(s));
         if( mynew != NULL )
@@ -36,8 +36,8 @@ int main(int argc, char **argv) {
             mynew->i1 = curr1;
             mynew->i2 = curr2;
             printf("Data added. Trying to access...\n");
-            printf("First datum: %f\n", mynew->i1);
-            printf("Second datum: %f\n", mynew->i2);
+            printf("First datum: %i\n", mynew->i1);
+            printf("Second datum: %i\n", mynew->i2);
         }
         printf("Freeing struct...\n");
         free(mynew);
