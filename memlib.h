@@ -41,8 +41,8 @@ typedef union header                     /* block header */
 static Header base;                      /* empty list to get started */
 static Header* freeptr = NULL;           /* start of free list */
 
-static Header *morecore(unsigned nu);    /* declare morecore now, morecore gets more dynamic memory from the system */
-void my_free(void *ap);                  /* declare my_free now */
+static Header *morecore(unsigned nu, char * file, char * line);    /* declare morecore now, morecore gets more dynamic memory from the system */
+void my_free(void *ap, char * file, char * line);                  /* declare my_free now */
 
 
 /* ErrorHandler function allows all included functions to throw errors to the handler, which provides useful feedback to the programmer */
@@ -115,7 +115,7 @@ void* my_malloc (size_t nbytes, char * file, char * line)
 
         if (p == freeptr)                    /* wrapped around free list */
         {
-            p = morecore(nunits);
+            p = morecore(nunits, file, line);
             if (p == NULL)
             {
                 result = NULL;                   /* none left */
@@ -133,7 +133,7 @@ void* my_malloc (size_t nbytes, char * file, char * line)
 #define NALLOC 1024 /* minimum #units to request */
 
 /* morecore: ask system for more memory */
-static Header *morecore(unsigned nunits)
+static Header *morecore(unsigned nunits, char * file, char * line)
 {
 
     void *cp;                             /* pointer for new free memory added to the heap */
@@ -153,7 +153,7 @@ static Header *morecore(unsigned nunits)
 
     up = (Header *) cp;                   /* makes a Header of the requested size in the new memory and returns it */
     up->s.size = nunits;
-    my_free((void *)(up+1));
+    my_free((void *)(up+1), file, line);
 
     return up;
 }
