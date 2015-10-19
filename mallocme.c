@@ -6,10 +6,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "memlib.h"
 
-#define malloc( x )     my_malloc( x, __FILE__, __LINE__ )
-#define free( x )       my_free( x, 0, __FILE__, __LINE__ )
+#define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+
+#define malloc( x )     my_malloc( x, __FILENAME__, __LINE__ )
+#define free( x )       my_free( x, 0, __FILENAME__, __LINE__ )
 
 typedef struct mystruct {
     int i1;

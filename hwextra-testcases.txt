@@ -1,0 +1,30 @@
+hwextra-testcases.txt
+
+The test program will take any two integers, and print out the following:
+
+
+---------------------------------------------------------------------------------------
+-bash-4.1$ ./mem <input1> <input2>
+Allocating memory for a new struct...
+Malloc succeeded, adding data...
+Data added. Trying to access...
+First datum: <input1>
+Second datum: <input2>
+Freeing struct...
+Now, let's test some errors...
+First error test...
+Error at file:m, line:48
+ERROR: You have already freed this block, and it has not been reallocated since.
+Second error test...
+Error at file:m, line:52
+ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.
+You can only use the included my_free() function to free memory allocated with the included my_malloc().
+Error at file:m, line:56
+ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.
+You can only use the included my_free() function to free memory allocated with the included my_malloc().
+---------------------------------------------------------------------------------------
+
+The program takes the two integers and makes a struct to hold them, allocating memory for it and checking that it suceeded.
+The program then checks that the integers were properly written into the struct. It then frees the memory allocated for the struct.
+It then tests that the error catching is working. It tries to free the same memory again, it tries to free unallocated memory, and it tries to free memory not allocated with my_malloc.
+It then exits.
