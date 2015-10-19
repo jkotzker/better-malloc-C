@@ -20,6 +20,7 @@
 
 
 typedef long Align;                      /* for alignment to long boundary */
+typedef int ErrorCode;                   /* used for managing errors in the included functions */
 
 /* Header is the type for a block of memory */
 
@@ -43,8 +44,34 @@ static Header* freeptr = NULL;           /* start of free list */
 static Header *morecore(unsigned nu);    /* declare morecore now, morecore gets more dynamic memory from the system */
 void my_free(void *ap);                  /* declare my_free now */
 
+
+/* ErrorHandler function allows all included functions to throw errors to the handler, which provides useful feedback to the programmer */
+void ErrorHandler (ErrorCode e, char * file, char * line)
+{
+    if(e == 1)
+    {
+        printf("Error at file:%s, line:%s\n", file, line);
+        printf("ERROR: System is out of dynamic memory! This is a problem, you cannot be allocated any more space.\n");
+        printf("Try checking your program for memory leaks.\n");
+    }
+
+    if(e == 2)
+    {
+        printf("Error at file:%s, line:%s\n", file, line);
+        printf("ERROR: You have tried to free memory that was either never allocated, or allocated with a memory allocation program not provided by memlib.h.\n");
+        printf("You can only use the included my_free() function to free memory allocated with the included my_malloc().\n");
+    }
+    if(e == 3)
+    {
+        printf("Error at file:%s, line:%s\n", file, line);
+        printf("ERROR: You have already freed this block, and it has not been reallocated since.\n");
+    }
+
+    return;
+}
+
 /* my_malloc: general-purpose storage allocator, with built-in error handling */
-void* my_malloc (size_t nbytes)
+void* my_malloc (size_t nbytes, char * file, char * line)
 {
     Header*  p;
     Header*  prevptr;
@@ -88,12 +115,12 @@ void* my_malloc (size_t nbytes)
 
         if (p == freeptr)                    /* wrapped around free list */
         {
-            //TODO: add a function here that adds more memory to the heap
             p = morecore(nunits);
             if (p == NULL)
             {
                 result = NULL;                   /* none left */
                 is_allocating = false;
+                ErrorHandler(1, file, line);
             }
         }
         prevptr = p;
@@ -121,7 +148,6 @@ static Header *morecore(unsigned nunits)
     cp = (void *) sbrk(nunits * sizeof(Header));      /* gets more memory from the system */
 
     if (cp == (char *) -1) {                           /* checks if there was no additional memory in the system */
-        //TODO: throw an error here
         return NULL;
     }
 
@@ -134,11 +160,26 @@ static Header *morecore(unsigned nunits)
 
 /* my_free, based off of K&R C */
 /* my_free: put block ap in free list */
-void my_free(void *ap) {
+void my_free(void *ap, char * file, char * line) {
     Header *bp;                                                          /* bp will point to Header of block being freed */
     Header *p;
     bp = (Header *)ap - 1;                                               /* make bp point to block header */
     p = freeptr;
+
+    unsigned int recog = bp->s.recognize;
+    if(!(recog == 0xAAAAAAAA || recog == 0xBBBBBBBB))
+    {
+        ErrorHandler(2, file, line);
+        return;
+    }
+    if(recog == 0xBBBBBBBB)
+    {
+        ErrorHandler(3, file, line);
+        return;
+    }
+    else {
+        recog = 0xBBBBBBBB;
+    }
 
     while(!(bp > p && bp < p->s.ptr)) {
         if (p >= p->s.ptr && (bp > p || bp < p->s.ptr)) {
@@ -163,4 +204,5 @@ void my_free(void *ap) {
         p->s.ptr = bp;
     }
     freeptr = p;
+    return;
 }
